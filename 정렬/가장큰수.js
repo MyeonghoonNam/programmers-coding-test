@@ -1,15 +1,15 @@
-const numbers = [0, 0];
+const numbers = [6, 10, 2];
 
 console.log(solution(numbers));
 
 function solution(numbers) {
-  const result = numbers.map((num) => {
-    return num.toString();
+  numbers = numbers.map((value) => {
+    return value.toString();
   });
 
-  result.sort((a, b) => {
+  numbers.sort((a, b) => {
     return b + a - (a + b);
   });
 
-  return result[0] === '0' ? '0' : result.join('');
+  return numbers[0] === '0' ? '0' : numbers.join('');
 }
