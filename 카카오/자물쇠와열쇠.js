@@ -1,23 +1,23 @@
-// 2차원 배열 90도 회전 함수
-const rotation90degreeKey = (key) => {
-  const len = key.length;
-  const rotation = Array.from(new Array(len), () => new Array(len).fill(0));
+const rotation90DegreeKey = (key) => {
+  const new_key = Array.from(new Array(key.length), () =>
+    new Array(key.length).fill(0)
+  );
 
-  for (let i = 0; i < len; i++) {
-    for (let j = 0; j < len; j++) {
-      rotation[i][j] = key[len - j - 1][i];
+  for (let i = 0; i < key.length; i++) {
+    for (let j = 0; j < key.length; j++) {
+      new_key[i][j] = key[key.length - j - 1][i];
     }
   }
 
-  return rotation;
+  return new_key;
 };
 
-const isAnswer = (newLock) => {
-  const len = Math.floor(newLock.length / 3);
+const checkOpenLock = (lock) => {
+  const length = lock.length / 3;
 
-  for (let i = len; i < len * 2; i++) {
-    for (let j = len; j < len * 2; j++) {
-      if (newLock[i][j] !== 1) {
+  for (let i = length; i < length * 2; i++) {
+    for (let j = length; j < length * 2; j++) {
+      if (lock[i][j] !== 1) {
         return false;
       }
     }
@@ -27,38 +27,42 @@ const isAnswer = (newLock) => {
 };
 
 const solution = (key, lock) => {
-  const N = lock.length;
-  const M = key.length;
-
+  // 2차원 배열인 자물쇠를 3 * 3 크기의 중앙에 오도록 초기화
   // 2차원 배열 확장
-  const newLock = Array.from(new Array(N * 3), () => new Array(N * 3).fill(0));
+  const new_lock = Array.from(new Array(lock.length * 3), () =>
+    new Array(lock.length * 3).fill(0)
+  );
 
-  // 중앙값 초기화
-  for (let i = 0; i < N; i++) {
-    for (let j = 0; j < N; j++) {
-      newLock[i + N][j + N] = lock[i][j];
+  // 3 * 3 크기의 중앙값에 기존 자물쇠 값으로 초기화
+  for (let i = 0; i < lock.length; i++) {
+    for (let j = 0; j < lock.length; j++) {
+      new_lock[i + lock.length][j + lock.length] = lock[i][j];
     }
   }
 
+  // 키를 회전해가며 탐색 (90도씩 회전하므로 4번의 경우가 전체 경우의 수)
   let dir = 4;
   while (dir--) {
-    key = rotation90degreeKey(key);
+    key = rotation90DegreeKey(key);
 
-    for (let x = 0; x < N * 2; x++) {
-      for (let y = 0; y < N * 2; y++) {
-        for (let i = 0; i < M; i++) {
-          for (let j = 0; j < M; j++) {
-            newLock[x + i][y + j] += key[i][j];
+    // 문제 조건에서 key의 크기는 항상 lock의 크기보다 작거나 같으므로 확장된 lock의 1부터 검사하여 불필요한 연산 횟수 줄이기
+    for (let x = 1; x < lock.length * 2; x++) {
+      for (let y = 1; y < lock.length * 2; y++) {
+        for (let i = 0; i < key.length; i++) {
+          for (let j = 0; j < key.length; j++) {
+            new_lock[x + i][y + j] += key[i][j];
           }
         }
 
-        if (isAnswer(newLock) === true) {
+        // lock이 열리는지 확인
+        if (checkOpenLock(new_lock)) {
           return true;
         }
 
-        for (let i = 0; i < M; i++) {
-          for (let j = 0; j < M; j++) {
-            newLock[x + i][y + j] -= key[i][j];
+        // lock이 열리지 않는다면 new_lock에 더해진 현재 key 값을 다시 빼어 new_lock 초기화
+        for (let i = 0; i < key.length; i++) {
+          for (let j = 0; j < key.length; j++) {
+            new_lock[x + i][y + j] -= key[i][j];
           }
         }
       }
