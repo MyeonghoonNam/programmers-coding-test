@@ -5,99 +5,69 @@
  * 음악 배열 길이가 2이상일 경우 재생시간 | 먼저 입력된 음악으로 정렬 후 1번째 음악 반환
  */
 
-const getMinutesFromTime = (time) => {
-  const [hours, minutes] = time.split(":").map(Number);
-  const totalMinutes = hours * 60 + minutes;
-
-  return totalMinutes;
-};
-
 const getMinutesPlayTime = (startTime, endTime) => {
-  const [startHours, startMinutes] = startTime.split(":").map(Number);
-  const [endHours, endMinutes] = endTime.split(":").map(Number);
+  const [startHours, startMinutes] = startTime.split(":");
+  const [endHours, endMinutes] = endTime.split(":");
 
-  const playTime = endHours * 60 + endMinutes - startHours * 60 + startMinutes;
+  const playTime = 60 * (endHours - startHours) + (endMinutes - startMinutes);
 
   return playTime;
 };
 
-const getScoreCollection = (score) => {
-  const reg = /([a-z])#?/gi;
-  const result = [...new Set(score.match(reg))];
-
-  return result;
-};
-
-const getScoreLength = (score) => {
-  const reg = /([a-z])#?/gi;
-  const result = score.match(reg).length;
-
-  return result;
-};
-
 const solution = (m, musicinfos) => {
-  const map = [];
+  const map = musicinfos.map((info) => {
+    const [startTime, endTime, name, code] = info.split(",");
+    const playTime = getMinutesPlayTime(startTime, endTime);
 
-  musicinfos.forEach((info) => {
-    const [startTime, endTime, name, score] = info.split(",");
+    const reg = /[A-Z]#?/g;
+    const codeCollection = code.match(reg);
 
-    map.push({
-      startTime: getMinutesFromTime(startTime),
-      playTime: getMinutesPlayTime(startTime, endTime),
-      name,
-      score,
-      scoreLength: getScoreLength(score),
-      scoreCollection: getScoreCollection(score),
-    });
+    let stream = "";
+
+    stream += code.repeat(parseInt(playTime / codeCollection.length));
+    stream += codeCollection
+      .slice(0, playTime % codeCollection.length)
+      .join("");
+
+    const music = { name, playTime, stream };
+
+    return music;
   });
 
-  const result = [];
+  const result = map.filter(({ stream }) => {
+    let index = stream.indexOf(m);
 
-  map.forEach((info) => {
-    const { playTime, score, scoreLength, scoreCollection } = info;
-
-    let music = "";
-
-    if (playTime >= scoreLength) {
-      const repeat = parseInt(playTime / scoreLength);
-      const mod = playTime / scoreLength;
-
-      music += score.repeat(repeat);
-      music += scoreCollection.slice(0, mod).join("");
+    if (index === -1) {
+      return false;
     }
 
-    if (playTime < scoreLength) {
-      music += scoreCollection.slice(0, playTime).join("");
-    }
-
-    let index = music.indexOf(m);
-
-    if (index) {
-      while (index) {
-        if (music[index + m.length] !== "#") {
-          result.push(info);
-          break;
-        }
-
-        index = music.indexOf(m, index + 1);
+    while (index !== -1) {
+      if (stream[index + m.length] !== "#") {
+        return true;
       }
+
+      index = stream.indexOf(m, index + 1);
     }
   });
 
-  if (result.length === 0) {
+  if (!result.length) {
     return "(None)";
   }
 
   if (result.length > 1) {
-    result.sort(
-      (a, b) => (b.playTime - a.playTime) | (a.startTime - b.startTime)
-    );
+    result.sort((a, b) => {
+      if (a.playTime === b.playTime) {
+        return 0;
+      }
+
+      return b.playTime - a.playTime;
+    });
   }
 
   return result[0].name;
 };
 
-const m = "ABC";
-const musicinfos = ["12:00,12:14,HELLO,C#DEFGAB", "13:00,13:05,WORLD,ABCDEF"];
+const m = "CC#BCC#BCC#BCC#B";
+const musicinfos = ["03:00,03:30,FOO,CC#B", "04:00,04:31,BAR,CC#BCC#BCC#B"];
 
 console.log(solution(m, musicinfos));
