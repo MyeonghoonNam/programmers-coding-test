@@ -44,14 +44,14 @@ class MinHeap {
     const rightChildIndex = currentIndex * 2 + 2;
     let minIndex = currentIndex;
 
-    while (
+    if (
       leftChildIndex < this.size &&
       this.heap[leftChildIndex] < this.heap[minIndex]
     ) {
       minIndex = leftChildIndex;
     }
 
-    while (
+    if (
       rightChildIndex < this.size &&
       this.heap[rightChildIndex] < this.heap[minIndex]
     ) {
@@ -134,14 +134,14 @@ class MaxHeap {
     const rightChildIndex = currentIndex * 2 + 2;
     let minIndex = currentIndex;
 
-    while (
+    if (
       leftChildIndex < this.size &&
       this.heap[leftChildIndex] > this.heap[minIndex]
     ) {
       minIndex = leftChildIndex;
     }
 
-    while (
+    if (
       rightChildIndex < this.size &&
       this.heap[rightChildIndex] > this.heap[minIndex]
     ) {
